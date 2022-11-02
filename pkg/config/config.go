@@ -2,42 +2,18 @@ package config
 
 import (
 	"fmt"
+	"github.com/showcase-gig-platform/nora-resource-detector/pkg/manager"
+	"github.com/showcase-gig-platform/nora-resource-detector/pkg/notify"
 	"gopkg.in/yaml.v2"
 	"os"
 	"strings"
 )
 
 type Config struct {
-	TargetResources           []string `yaml:"targetResources"`
-	ManagedResourceDefinition `yaml:"managedResourceDefinition"`
-	Notifier                  NotifierConfig `yaml:"notifier"`
+	TargetResources  []string                        `yaml:"targetResources"`
+	ResourceManagers []manager.ResourceManagerConfig `yaml:"resourceManagers"`
+	Notifiers        []notify.NotifierConfig         `yaml:"notifiers"`
 }
-
-type ManagedResourceDefinition struct {
-	ArgoCD            ArgoCDConfig            `yaml:"argocd"`
-	EksAddon          EksAddonconfig          `yaml:"eksAddon"`
-	HasOwnerReference HasOwnerReferenceConfig `yaml:"hasOwnerReference"`
-	StaticConfigs     []StaticConfig          `yaml:"staticConfigs"`
-}
-
-type ArgoCDConfig struct {
-	InstanceLabelKey string `yaml:"instanceLabelKey"`
-}
-
-type EksAddonconfig struct{}
-
-type HasOwnerReferenceConfig struct{}
-
-type StaticConfig struct {
-	Resource string   `yaml:"resource"`
-	Names    []string `yaml:"names"`
-}
-
-type NotifierConfig struct {
-	Stdout StdoutConfig `yaml:"stdout"`
-}
-
-type StdoutConfig struct{}
 
 func LoadConfig(path string) (Config, error) {
 	var cfg Config
@@ -54,12 +30,6 @@ func LoadConfig(path string) (Config, error) {
 	}
 
 	err = yaml.UnmarshalStrict(buf, &cfg)
-
-	// ArgoCDのinstanceLabelKeyが指定されてない場合デフォルトを設定
-	// https://argo-cd.readthedocs.io/en/stable/faq/#why-is-my-app-out-of-sync-even-after-syncing
-	if cfg.ArgoCD.InstanceLabelKey == "" {
-		cfg.ArgoCD.InstanceLabelKey = "app.kubernetes.io/instance"
-	}
 
 	return cfg, err
 }
