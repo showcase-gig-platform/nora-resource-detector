@@ -21,6 +21,12 @@ type StsVolumeClaimTemplateDetector struct {
 	prefixes []string
 }
 
+// stsのvolumeClaimTemplateから作成されたpvcにはownerReferenceが付かず（sts削除時にgcしないので）、
+// どこのリソースから派生したpvcなのか厳密に判定することはできない
+// 一応、`template名`-`sts名`-`0からの連番` （`sts名`-`0からの連番` = pod名） という命名規則はあるので、
+// 「`template名`-`sts名`-」 がnameのprefixになっているpvcは管理されたpvcと判定する
+// なので、手動作成した野良pvcがこの命名規則に当てはまると野良リソースとして検出できない
+
 func NewStsVolumeClaimTemplateDetector(i dynamic.Interface) StsVolumeClaimTemplateDetector {
 	prefixes, err := stsVolumeClaimTemplatePrefixes(i)
 	if err != nil {
