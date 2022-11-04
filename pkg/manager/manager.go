@@ -9,10 +9,11 @@ import (
 )
 
 type ResourceManagerConfig struct {
-	ArgoCD         *ArgoCDConfig         `yaml:"argocd"`
-	EksAddon       *EksAddonConfig       `yaml:"eksAddon"`
-	OwnerReference *OwnerReferenceConfig `yaml:"ownerReference"`
-	Static         *StaticConfig         `yaml:"static"`
+	ArgoCD                 *ArgoCDConfig                 `yaml:"argocd"`
+	EksAddon               *EksAddonConfig               `yaml:"eksAddon"`
+	OwnerReference         *OwnerReferenceConfig         `yaml:"ownerReference"`
+	Static                 *StaticConfig                 `yaml:"static"`
+	StsVolumeClaimTemplate *StsVolumeClaimTemplateConfig `yaml:"stsVolumeClaimTemplate"`
 }
 
 type ResourceManagerDetector interface {
@@ -23,7 +24,7 @@ type Detector struct {
 	detectors []ResourceManagerDetector
 }
 
-func NewDetector(cfg []ResourceManagerConfig) (Detector, error) {
+func InitDetector(cfg []ResourceManagerConfig) (Detector, error) {
 	var kubeclient, err = client.NewKubeClient()
 	if err != nil {
 		return Detector{}, fmt.Errorf("failed to get kubernetes client: %s", err.Error())
@@ -56,6 +57,12 @@ func addDetectors(configs []ResourceManagerConfig, detectors *[]ResourceManagerD
 			*detectors = append(*detectors, NewStaticdetector(cfg.Static, kubeclient))
 			continue
 		}
+
+		if cfg.StsVolumeClaimTemplate != nil {
+			*detectors = append(*detectors, NewStsVolumeClaimTemplateDetector(kubeclient.Client))
+			continue
+		}
+
 		klog.Error("no match ResourceManagerConfig")
 	}
 }

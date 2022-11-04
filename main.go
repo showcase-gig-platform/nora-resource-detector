@@ -27,7 +27,7 @@ func main() {
 		klog.Fatal(err)
 	}
 
-	detector, err := manager.NewDetector(cfg.ResourceManagers)
+	detector, err := manager.InitDetector(cfg.ResourceManagers)
 	if err != nil {
 		klog.Fatal(err)
 	}
