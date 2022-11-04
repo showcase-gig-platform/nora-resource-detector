@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+
 	"github.com/showcase-gig-platform/nora-resource-detector/pkg/util"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime/schema"

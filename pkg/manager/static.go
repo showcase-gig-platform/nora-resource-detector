@@ -2,6 +2,7 @@ package manager
 
 import (
 	"github.com/showcase-gig-platform/nora-resource-detector/pkg/client"
+	"github.com/showcase-gig-platform/nora-resource-detector/pkg/resource"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/klog/v2"
@@ -36,16 +37,10 @@ func NewStaticdetector(config *StaticConfig, cli client.KubeClient) StaticDetect
 }
 
 func (sd StaticDetector) Execute(uns unstructured.Unstructured) bool {
-	name, ok, _ := unstructured.NestedString(uns.Object, "metadata", "name")
-	if !ok {
-		klog.Errorf("unstructured resource does not have `metadata.name` : %v", uns.Object)
-		return false
-	}
-	kind, ok, _ := unstructured.NestedString(uns.Object, "kind")
-	if !ok {
-		klog.Errorf("unstructured resource does not have `kind` : %v", uns.Object)
-		return false
-	}
+	name := resource.MustNestedString(uns, "metadata", "name")
+
+	kind := resource.MustNestedString(uns, "kind")
+
 	gvr, err := sd.client.SearchResource(kind)
 	if err != nil {
 		klog.Errorf("failed to find GroupVersionResouces: %v", err.Error())

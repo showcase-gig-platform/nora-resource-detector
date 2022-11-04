@@ -1,6 +1,9 @@
 package manager
 
-import "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+import (
+	"github.com/showcase-gig-platform/nora-resource-detector/pkg/resource"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+)
 
 type EksAddonConfig struct{}
 
@@ -15,14 +18,12 @@ func NewEksAddonDetector() EksAddonDetector {
 }
 
 func (ed EksAddonDetector) Execute(uns unstructured.Unstructured) bool {
-	mf, ok, _ := unstructured.NestedSlice(uns.Object, "metadata", "managedFields")
-	if ok {
-		for _, ifc := range mf {
-			m, ok := ifc.(map[string]interface{})
-			if ok {
-				if m["manager"] == managedFieldsEKSManagerName {
-					return true
-				}
+	mf := resource.MustNestedSlice(uns, "metadata", "managedFields")
+	for _, ifc := range mf {
+		m, ok := ifc.(map[string]interface{})
+		if ok {
+			if m["manager"] == managedFieldsEKSManagerName {
+				return true
 			}
 		}
 	}

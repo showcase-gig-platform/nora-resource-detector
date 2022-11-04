@@ -2,11 +2,12 @@ package config
 
 import (
 	"fmt"
+	"os"
+	"strings"
+
 	"github.com/showcase-gig-platform/nora-resource-detector/pkg/manager"
 	"github.com/showcase-gig-platform/nora-resource-detector/pkg/notify"
 	"gopkg.in/yaml.v2"
-	"os"
-	"strings"
 )
 
 type Config struct {

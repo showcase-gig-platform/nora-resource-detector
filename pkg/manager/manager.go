@@ -2,6 +2,7 @@ package manager
 
 import (
 	"fmt"
+
 	"github.com/showcase-gig-platform/nora-resource-detector/pkg/client"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/klog/v2"

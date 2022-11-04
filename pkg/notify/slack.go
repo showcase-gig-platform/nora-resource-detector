@@ -3,10 +3,11 @@ package notify
 import (
 	"errors"
 	"fmt"
+	"os"
+
 	"github.com/showcase-gig-platform/nora-resource-detector/pkg/util"
 	"github.com/slack-go/slack"
 	"k8s.io/klog/v2"
-	"os"
 )
 
 type SlackConfig struct {

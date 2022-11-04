@@ -3,6 +3,8 @@ package manager
 import (
 	"context"
 	"fmt"
+
+	"github.com/showcase-gig-platform/nora-resource-detector/pkg/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -58,30 +60,19 @@ func argoApplications(i dynamic.Interface) ([]string, error) {
 		return result, fmt.Errorf("failed to get argocd applications: %s", err.Error())
 	}
 	for _, item := range uns.Items {
-		name, ok, err := unstructured.NestedString(item.Object, "metadata", "name")
-		if ok {
-			result = append(result, name)
-		} else {
-			if err != nil {
-				klog.Errorf("failed to fetch argocd application name: %s", err.Error())
-			} else {
-				klog.Errorln("failed to fetch argocd application name with no error.")
-			}
-		}
+		result = append(result, resource.MustNestedString(item, "metadata", "name"))
 	}
 	return result, nil
 }
 
 func managedByArgoCD(uns unstructured.Unstructured, applications []string, labelKey string) bool {
-	md, ok, _ := unstructured.NestedMap(uns.Object, "metadata", "labels")
-	if ok {
-		target := md[labelKey]
-		s, aok := target.(string)
-		if aok {
-			for _, application := range applications {
-				if s == application {
-					return true
-				}
+	md := resource.MustNestedMap(uns, "metadata", "labels")
+	target := md[labelKey]
+	s, aok := target.(string)
+	if aok {
+		for _, application := range applications {
+			if s == application {
+				return true
 			}
 		}
 	}

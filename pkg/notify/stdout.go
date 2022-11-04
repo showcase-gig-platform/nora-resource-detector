@@ -3,6 +3,7 @@ package notify
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/showcase-gig-platform/nora-resource-detector/pkg/util"
 	"k8s.io/klog/v2"
 )
