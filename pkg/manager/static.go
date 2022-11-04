@@ -13,8 +13,9 @@ type StaticConfig struct {
 }
 
 type Config struct {
-	Resource string   `yaml:"resource"`
-	Names    []string `yaml:"names"`
+	Resource  string   `yaml:"resource"`
+	Namespace string   `yaml:"namespace"`
+	Names     []string `yaml:"names"`
 }
 
 type StaticDetector struct {
@@ -24,7 +25,8 @@ type StaticDetector struct {
 
 type fetchedStaticConfig struct {
 	schema.GroupVersionResource
-	names []string
+	namespace string
+	names     []string
 }
 
 func NewStaticdetector(config *StaticConfig, cli client.KubeClient) StaticDetector {
@@ -38,6 +40,7 @@ func NewStaticdetector(config *StaticConfig, cli client.KubeClient) StaticDetect
 
 func (sd StaticDetector) Execute(uns unstructured.Unstructured) bool {
 	name := resource.MustNestedString(uns, "metadata", "name")
+	ns := resource.MustNestedString(uns, "metadata", "namespace")
 
 	kind := resource.MustNestedString(uns, "kind")
 
@@ -47,7 +50,7 @@ func (sd StaticDetector) Execute(uns unstructured.Unstructured) bool {
 		return false
 	}
 
-	return staticConfigResource(name, gvr, sd.confs)
+	return staticConfigResource(ns, name, gvr, sd.confs)
 }
 
 func fetchStaticConfig(confs []Config, cli client.KubeClient) []fetchedStaticConfig {
@@ -60,15 +63,16 @@ func fetchStaticConfig(confs []Config, cli client.KubeClient) []fetchedStaticCon
 		}
 		result = append(result, fetchedStaticConfig{
 			GroupVersionResource: gvr,
+			namespace:            conf.Namespace,
 			names:                conf.Names,
 		})
 	}
 	return result
 }
 
-func staticConfigResource(name string, gvr schema.GroupVersionResource, confs []fetchedStaticConfig) bool {
+func staticConfigResource(ns, name string, gvr schema.GroupVersionResource, confs []fetchedStaticConfig) bool {
 	for _, conf := range confs {
-		if conf.GroupVersionResource == gvr {
+		if conf.GroupVersionResource == gvr && ns == conf.namespace {
 			for _, s := range conf.names {
 				if name == s {
 					return true
