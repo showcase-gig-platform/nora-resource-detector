@@ -2,19 +2,15 @@ FROM public.ecr.aws/docker/library/golang:1.19 AS builder
 
 WORKDIR /workdir
 
-COPY go.mod ./
-COPY go.sum ./
+COPY . .
 
-RUN go mod download
+RUN go mod download && \
+    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o nora-resource-detector main.go
 
-COPY main.go ./
-
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o nora-resource-detector main.go
-
-FROM scratch
+FROM gcr.io/distroless/static:nonroot
 
 WORKDIR /
+
 COPY --from=builder /workdir/nora-resource-detector .
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
 ENTRYPOINT ["/nora-resource-detector"]
