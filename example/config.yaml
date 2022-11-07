@@ -1,0 +1,24 @@
+targetResources:
+  - deployment
+  - statefulset
+  - daemonset
+  - ingress
+  - persistentvolumeclaim
+resourceManagers:
+  - argocd: {}
+  - eksAddon: {}
+  - ownerReference: {}
+  - stsVolumeClaimTemplate: {}
+  - static:
+      configs:
+        - resource: deployment
+          namespace: default
+          names:
+            - my-test-deployment
+            - default-deployment
+notifiers:
+  - stdout: {}
+  - slack:
+      channel: notify_channel
+      username: nora
+      icon_emoji: cat

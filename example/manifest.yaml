@@ -1,0 +1,86 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: nora-resource-detector
+spec:
+  schedule: "0 3 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: nora-resource-detector
+          restartPolicy: Never
+          containers:
+            - name: nora-resource-detector
+              image: public.ecr.aws/q1m5p9s1/nora-resource-detector:latest
+              args:
+                - --config-file
+                - /config/config.yaml
+              volumeMounts:
+                - mountPath: /config
+                  name: config
+          volumes:
+            - name: config
+              configMap:
+                name: nora-resource-detector
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nora-resource-detector
+data:
+  config.yaml: |
+    targetResources:
+      - deployment
+      - statefulset
+      - daemonset
+      - ingress
+      - persistentvolumeclaim
+    resourceManagers:
+      - argocd: {}
+      - eksAddon: {}
+      - ownerReference: {}
+      - stsVolumeClaimTemplate: {}
+      - static:
+          configs:
+            - resource: deployment
+              namespace: default
+              names:
+                - my-test-deployment
+                - default-deployment
+    notifiers:
+      - stdout: {}
+      - slack:
+          channel: notify_channel
+          username: nora
+          icon_emoji: cat
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nora-resource-detector
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: nora-resource-detector
+rules:
+  - apiGroups:
+      - '*'
+    resources:
+      - '*'
+    verbs:
+      - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: nora-resource-detector
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: nora-resource-detector
+subjects:
+  - kind: ServiceAccount
+    name: nora-resource-detector
+    namespace: default
