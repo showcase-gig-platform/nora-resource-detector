@@ -40,7 +40,7 @@ func NewStaticdetector(config *StaticConfig, cli client.KubeClient) StaticDetect
 
 func (sd StaticDetector) Execute(uns unstructured.Unstructured) bool {
 	name := resource.MustNestedString(uns, "metadata", "name")
-	ns := resource.MustNestedString(uns, "metadata", "namespace")
+	ns := uns.GetNamespace()
 
 	kind := resource.MustNestedString(uns, "kind")
 

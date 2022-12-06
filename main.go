@@ -53,7 +53,7 @@ func main() {
 		}
 
 		for name, uns := range rs {
-			ns := resource.MustNestedString(uns, "metadata", "namespace")
+			ns := uns.GetNamespace()
 			unmanagedResources = append(unmanagedResources, util.GroupResourceName{
 				Group:     gvr.Group,
 				Resource:  gvr.Resource,
