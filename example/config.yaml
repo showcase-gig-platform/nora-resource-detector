@@ -10,6 +10,7 @@ resourceManagers:
   - ownerReference: {}
   - stsVolumeClaimTemplate: {}
   - serviceAccountToken: {}
+  - certificateSecret: {}
   - static:
       configs:
         - resource: deployment

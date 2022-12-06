@@ -52,7 +52,7 @@ func argoApplications(i dynamic.Interface) ([]string, error) {
 	var result []string
 	uns, err := i.Resource(schema.GroupVersionResource{
 		Group:    "argoproj.io",
-		Version:  "v1alpha1",
+		Version:  "v1alpha1", // TODO: versionは指定しなくていいようにしたい
 		Resource: "applications",
 	}).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
