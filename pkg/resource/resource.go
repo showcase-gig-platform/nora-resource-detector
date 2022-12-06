@@ -2,9 +2,6 @@ package resource
 
 import (
 	"context"
-	"fmt"
-	"strings"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -24,41 +21,4 @@ func ListUnstructuredResources(i dynamic.Interface, gvr schema.GroupVersionResou
 		result[name] = resource
 	}
 	return result, nil
-}
-
-func MustNestedString(uns unstructured.Unstructured, fields ...string) string {
-	result, ok, err := unstructured.NestedString(uns.Object, fields...)
-	if err != nil {
-		klog.Errorf("failed to get nested string from unstructured object: %s", err.Error())
-	}
-	if !ok {
-		klog.Infof("unstructured resource does not have `%v`: %v", strings.Join(fields, "."), resourceInfo(uns))
-	}
-	return result
-}
-
-func MustNestedSlice(uns unstructured.Unstructured, fields ...string) []interface{} {
-	result, ok, err := unstructured.NestedSlice(uns.Object, fields...)
-	if err != nil {
-		klog.Errorf("failed to get nested slice from unstructured object: %s", err.Error())
-	}
-	if !ok {
-		klog.Infof("unstructured resource does not have `%v`: %v", strings.Join(fields, "."), resourceInfo(uns))
-	}
-	return result
-}
-
-func MustNestedMap(uns unstructured.Unstructured, fields ...string) map[string]interface{} {
-	result, ok, err := unstructured.NestedMap(uns.Object, fields...)
-	if err != nil {
-		klog.Errorf("failed to get nested map from unstructured object: %s", err.Error())
-	}
-	if !ok {
-		klog.Infof("unstructured resource does not have `%v`: %v", strings.Join(fields, "."), resourceInfo(uns))
-	}
-	return result
-}
-
-func resourceInfo(uns unstructured.Unstructured) string {
-	return fmt.Sprintf("Kind: %v, Namespace: %v, Name: %v", uns.GetKind(), uns.GetNamespace(), uns.GetName())
 }
