@@ -14,6 +14,7 @@ type ResourceManagerConfig struct {
 	OwnerReference         *OwnerReferenceConfig         `yaml:"ownerReference"`
 	Static                 *StaticConfig                 `yaml:"static"`
 	StsVolumeClaimTemplate *StsVolumeClaimTemplateConfig `yaml:"stsVolumeClaimTemplate"`
+	ServiceAccountToken    *ServiceAccountTokenConfig    `yaml:"serviceAccountToken"`
 }
 
 type ResourceManagerDetector interface {
@@ -60,6 +61,11 @@ func addDetectors(configs []ResourceManagerConfig, detectors *[]ResourceManagerD
 
 		if cfg.StsVolumeClaimTemplate != nil {
 			*detectors = append(*detectors, NewStsVolumeClaimTemplateDetector(kubeclient.Client))
+			continue
+		}
+
+		if cfg.ServiceAccountToken != nil {
+			*detectors = append(*detectors, NewServiceAccountTokenDetector())
 			continue
 		}
 

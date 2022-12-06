@@ -41,6 +41,7 @@ data:
       - eksAddon: {}
       - ownerReference: {}
       - stsVolumeClaimTemplate: {}
+      - serviceAccountToken: {}
       - static:
           configs:
             - resource: deployment
