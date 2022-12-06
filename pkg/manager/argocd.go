@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/showcase-gig-platform/nora-resource-detector/pkg/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -60,20 +59,17 @@ func argoApplications(i dynamic.Interface) ([]string, error) {
 		return result, fmt.Errorf("failed to get argocd applications: %s", err.Error())
 	}
 	for _, item := range uns.Items {
-		result = append(result, resource.MustNestedString(item, "metadata", "name"))
+		result = append(result, item.GetName())
 	}
 	return result, nil
 }
 
 func managedByArgoCD(uns unstructured.Unstructured, applications []string, labelKey string) bool {
-	md := resource.MustNestedMap(uns, "metadata", "labels")
+	md := uns.GetLabels()
 	target := md[labelKey]
-	s, aok := target.(string)
-	if aok {
-		for _, application := range applications {
-			if s == application {
-				return true
-			}
+	for _, application := range applications {
+		if target == application {
+			return true
 		}
 	}
 	return false

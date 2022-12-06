@@ -20,7 +20,7 @@ func ListUnstructuredResources(i dynamic.Interface, gvr schema.GroupVersionResou
 		return result, err
 	}
 	for _, resource := range uns.Items {
-		name := MustNestedString(resource, "metadata", "name")
+		name := resource.GetName()
 		result[name] = resource
 	}
 	return result, nil

@@ -7,7 +7,6 @@ import (
 	"k8s.io/klog/v2"
 	"strings"
 
-	"github.com/showcase-gig-platform/nora-resource-detector/pkg/resource"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -38,7 +37,7 @@ func NewStsVolumeClaimTemplateDetector(i dynamic.Interface) StsVolumeClaimTempla
 }
 
 func (sd StsVolumeClaimTemplateDetector) Execute(uns unstructured.Unstructured) bool {
-	name := resource.MustNestedString(uns, "metadata", "name")
+	name := uns.GetName()
 	for _, prefix := range sd.prefixes {
 		if strings.HasPrefix(name, prefix) {
 			return true
@@ -58,8 +57,11 @@ func stsVolumeClaimTemplatePrefixes(i dynamic.Interface) ([]string, error) {
 		return result, fmt.Errorf("failed to get statefulset: %s", err.Error())
 	}
 	for _, item := range uns.Items {
-		stsName := resource.MustNestedString(item, "metadata", "name")
-		vcts := resource.MustNestedSlice(item, "spec", "volumeClaimTemplates")
+		stsName := item.GetName()
+		vcts, _, e := unstructured.NestedSlice(item.Object, "spec", "volumeClaimTemplates")
+		if e != nil {
+			klog.Errorf("failed to get spec.volumeClaimTemplates from statefulset: %s", err.Error())
+		}
 		for _, vct := range vcts {
 			pvc, err := fetchPvcTemplate(vct)
 			if err != nil {
