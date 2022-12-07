@@ -16,6 +16,7 @@ spec:
               args:
                 - --config-file
                 - /config/config.yaml
+                - --in-cluster
               volumeMounts:
                 - mountPath: /config
                   name: config
