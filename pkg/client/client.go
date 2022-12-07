@@ -31,31 +31,32 @@ func NewKubeClient() (KubeClient, error) {
 		if err != nil {
 			return KubeClient{}, fmt.Errorf("failed to load in cluster config: %s", err.Error())
 		}
-	}
-	configFromEnv := os.Getenv("KUBECONFIG")
-	if len(util.Kubeconfig) != 0 {
-		kubeconfigPath = util.Kubeconfig
-	} else if len(configFromEnv) != 0 {
-		kubeconfigPath = configFromEnv
-	}
+	} else {
+		configFromEnv := os.Getenv("KUBECONFIG")
+		if len(util.Kubeconfig) != 0 {
+			kubeconfigPath = util.Kubeconfig
+		} else if len(configFromEnv) != 0 {
+			kubeconfigPath = configFromEnv
+		}
 
-	cor := &clientcmd.ConfigOverrides{
-		ClusterInfo: api.Cluster{
-			Server: util.ApiserverUrl,
-		},
-	}
-	if len(util.KubeContext) != 0 {
-		cor.CurrentContext = util.KubeContext
-	}
-	clientConfig, err = clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-		&clientcmd.ClientConfigLoadingRules{
-			ExplicitPath: kubeconfigPath,
-		},
-		cor,
-	).ClientConfig()
+		cor := &clientcmd.ConfigOverrides{
+			ClusterInfo: api.Cluster{
+				Server: util.ApiserverUrl,
+			},
+		}
+		if len(util.KubeContext) != 0 {
+			cor.CurrentContext = util.KubeContext
+		}
+		clientConfig, err = clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+			&clientcmd.ClientConfigLoadingRules{
+				ExplicitPath: kubeconfigPath,
+			},
+			cor,
+		).ClientConfig()
 
-	if err != nil {
-		return KubeClient{}, fmt.Errorf("failed to build kubeconfig: %s", err.Error())
+		if err != nil {
+			return KubeClient{}, fmt.Errorf("failed to build kubeconfig: %s", err.Error())
+		}
 	}
 
 	rm, err := restMapper(clientConfig)
