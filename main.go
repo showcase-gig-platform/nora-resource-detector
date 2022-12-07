@@ -37,7 +37,7 @@ func process() {
 	if err != nil {
 		klog.Fatal(err)
 	}
-	klog.Infof("loaded config: %#v", cfg)
+	klog.V(5).Infof("loaded config: %#v", cfg)
 
 	kc, err := client.NewKubeClient()
 	if err != nil {
