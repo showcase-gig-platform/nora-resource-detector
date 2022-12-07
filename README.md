@@ -47,6 +47,10 @@ If you want to specify other static.
     URL for kubernetes api server.
 --kubeconfig string
     Path to kubeconfig file.
+--context string
+    Kubeconfig context name to use.
+--in-cluster
+    Set true if used in kubernetes cluster.
 ```
 
 ## RBAC

@@ -21,7 +21,6 @@ func NewCertificateSecretDetector(i dynamic.Interface) CertificateSecretDetector
 	if err != nil {
 		klog.Errorf("failed to get certificate name list: %s", err.Error())
 	}
-	klog.Infoln(cs)
 	return CertificateSecretDetector{
 		certificates: cs,
 	}

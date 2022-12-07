@@ -2,6 +2,9 @@ package client
 
 import (
 	"fmt"
+	"k8s.io/client-go/util/homedir"
+	"os"
+	"path/filepath"
 
 	"github.com/showcase-gig-platform/nora-resource-detector/pkg/util"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -11,6 +14,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/restmapper"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/tools/clientcmd/api"
 )
 
 type KubeClient struct {
@@ -19,7 +23,37 @@ type KubeClient struct {
 }
 
 func NewKubeClient() (KubeClient, error) {
-	clientConfig, err := clientcmd.BuildConfigFromFlags(util.ApiserverUrl, util.Kubeconfig)
+	var clientConfig *rest.Config
+	var err error
+	kubeconfigPath := filepath.Join(homedir.HomeDir(), ".kube", "config")
+	if util.UseInclusterConfig {
+		clientConfig, err = rest.InClusterConfig()
+		if err != nil {
+			return KubeClient{}, fmt.Errorf("failed to load in cluster config: %s", err.Error())
+		}
+	}
+	configFromEnv := os.Getenv("KUBECONFIG")
+	if len(util.Kubeconfig) != 0 {
+		kubeconfigPath = util.Kubeconfig
+	} else if len(configFromEnv) != 0 {
+		kubeconfigPath = configFromEnv
+	}
+
+	cor := &clientcmd.ConfigOverrides{
+		ClusterInfo: api.Cluster{
+			Server: util.ApiserverUrl,
+		},
+	}
+	if len(util.KubeContext) != 0 {
+		cor.CurrentContext = util.KubeContext
+	}
+	clientConfig, err = clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+		&clientcmd.ClientConfigLoadingRules{
+			ExplicitPath: kubeconfigPath,
+		},
+		cor,
+	).ClientConfig()
+
 	if err != nil {
 		return KubeClient{}, fmt.Errorf("failed to build kubeconfig: %s", err.Error())
 	}
