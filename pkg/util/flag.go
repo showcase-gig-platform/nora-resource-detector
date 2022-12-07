@@ -1,7 +1,7 @@
 package util
 
 import (
-	"flag"
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -12,10 +12,10 @@ var (
 	UseInclusterConfig bool
 )
 
-func init() {
-	flag.StringVar(&ConfigPath, "config", "~/.nora/config.yaml", "Path to config file.")
-	flag.StringVar(&ApiserverUrl, "apiserver-url", "", "URL for kubernetes api server.")
-	flag.StringVar(&Kubeconfig, "kubeconfig", "", "Path to kubeconfig file.")
-	flag.StringVar(&KubeContext, "context", "", "Kubeconfig context name to use.")
-	flag.BoolVar(&UseInclusterConfig, "in-cluster", false, "Set true if used in kubernetes cluster.")
+func AddFlags(cmd *cobra.Command) {
+	cmd.PersistentFlags().StringVarP(&ConfigPath, "config", "c", "~/.nora/config.yaml", "Path to config file.")
+	cmd.PersistentFlags().StringVarP(&ApiserverUrl, "apiserver-url", "u", "", "URL for kubernetes api server.")
+	cmd.PersistentFlags().StringVarP(&Kubeconfig, "kubeconfig", "k", "", "Path to kubeconfig file.")
+	cmd.PersistentFlags().StringVarP(&KubeContext, "context", "", "", "Kubeconfig context name to use.")
+	cmd.PersistentFlags().BoolVarP(&UseInclusterConfig, "in-cluster", "i", false, "Set true if used in kubernetes cluster.")
 }
