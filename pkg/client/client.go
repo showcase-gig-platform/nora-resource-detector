@@ -1,8 +1,12 @@
 package client
 
 import (
+	"context"
 	"fmt"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/client-go/util/homedir"
+	"k8s.io/klog/v2"
 	"os"
 	"path/filepath"
 
@@ -100,4 +104,13 @@ func (k KubeClient) SearchResource(resource string) (schema.GroupVersionResource
 		return schema.GroupVersionResource{}, err
 	}
 	return gvr, nil
+}
+
+func (k KubeClient) ListUnstructuredResources(gvr schema.GroupVersionResource) ([]unstructured.Unstructured, error) {
+	uns, err := k.Client.Resource(gvr).List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		klog.Errorf("failed to list resources: %s", err.Error())
+		return []unstructured.Unstructured{}, err
+	}
+	return uns.Items, nil
 }

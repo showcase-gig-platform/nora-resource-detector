@@ -6,10 +6,10 @@ import (
 	"github.com/showcase-gig-platform/nora-resource-detector/pkg/config"
 	"github.com/showcase-gig-platform/nora-resource-detector/pkg/manager"
 	"github.com/showcase-gig-platform/nora-resource-detector/pkg/notify"
-	"github.com/showcase-gig-platform/nora-resource-detector/pkg/resource"
 	"github.com/showcase-gig-platform/nora-resource-detector/pkg/util"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/klog/v2"
 )
 
@@ -57,25 +57,25 @@ func process() {
 			continue
 		}
 
-		rs, err := resource.ListUnstructuredResources(kc.Client, gvr)
+		rs, err := kc.ListUnstructuredResources(gvr)
 		if err != nil {
 			klog.Errorf("failed to list resources : %s", err.Error())
 			continue
 		}
 
-		for name, uns := range rs {
-			if detector.Execute(uns) {
-				delete(rs, name)
+		var tr []unstructured.Unstructured
+		for _, uns := range rs {
+			if !detector.Execute(uns) {
+				tr = append(tr, uns)
 			}
 		}
 
-		for name, uns := range rs {
-			ns := uns.GetNamespace()
+		for _, uns := range tr {
 			unmanagedResources = append(unmanagedResources, util.GroupResourceName{
 				Group:     gvr.Group,
 				Resource:  gvr.Resource,
-				Namespace: ns,
-				Name:      name,
+				Namespace: uns.GetNamespace(),
+				Name:      uns.GetName(),
 			})
 		}
 	}
